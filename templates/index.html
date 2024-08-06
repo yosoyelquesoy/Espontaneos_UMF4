@@ -38,6 +38,8 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
+            width: 100%;
+            box-sizing: border-box; /* Ensure padding is included in the width */
         }
         button {
             padding: 10px;
@@ -47,6 +49,8 @@
             border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
+            width: 100%; /* Make button fill the width of the container */
+            box-sizing: border-box; /* Ensure padding is included in the width */
         }
         button:hover {
             background-color: #218838;
@@ -85,23 +89,23 @@
 <body>
     <div class="container">
         <h2>Solicitud de atención a paciente sin cita</h2>
-        <form id="surveyForm" method="POST" onsubmit="handleSubmit(event)">
-            <label for="name">Nombre Completo:</label><br>
+        <form id="surveyForm" method="POST" action="/submit" onsubmit="handleSubmit(event)">
+            <label for="name">Nombre Completo:</label>
             <input type="text" id="name" name="name" required>
             
-            <label for="email">Correo Electrónico:</label><br>
+            <label for="email">Correo Electrónico:</label>
             <input type="email" id="email" name="email" required>
             
-            <label for="ssn">Número de Seguro Social:</label><br>
+            <label for="ssn">Número de Seguro Social:</label>
             <input type="text" id="ssn" name="ssn" required>
             
-            <label for="agg">Agregado:</label><br>
+            <label for="agg">Agregado:</label>
             <input type="text" id="agg" name="agg" required>
             
-            <label for="phone">Teléfono:</label><br>
+            <label for="phone">Teléfono:</label>
             <input type="tel" id="phone" name="phone" required>
             
-            <label for="consultorio">Consultorio:</label><br>
+            <label for="consultorio">Consultorio:</label>
             <select id="consultorio" name="consultorio" required>
                 <option value="" disabled selected>Seleccione...</option>
                 <option value="1">1</option>
@@ -119,7 +123,7 @@
                 <option value="13">13</option>
             </select>
             
-            <label for="turno">Turno:</label><br>
+            <label for="turno">Turno:</label>
             <select id="turno" name="turno" required>
                 <option value="" disabled selected>Seleccione...</option>
                 <option value="matutino">Matutino</option>
@@ -129,7 +133,7 @@
             <label for="terms">
                 <input type="checkbox" id="terms" name="terms" required>
                 Acepto las <a href="javascript:void(0);" onclick="showTerms()">políticas de privacidad</a>
-            </label><br>
+            </label>
             
             <button type="submit">Enviar</button>
         </form>
@@ -168,7 +172,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = '/thankyou';
+                    window.location.href = data.redirect;
                 } else {
                     alert(data.message);
                 }
