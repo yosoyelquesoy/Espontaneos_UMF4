@@ -109,7 +109,7 @@ def update_survey_status():
     save_config(config)
     return jsonify({'success': True})
 
-@app.route('/update_survey_schedule', methods=['POST'])
+@app.route('/update_survey_schedule', methods['POST'])
 def update_survey_schedule():
     if not session.get('admin'):
         return redirect(url_for('admin'))

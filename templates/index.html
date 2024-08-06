@@ -43,7 +43,7 @@
         }
         .checkbox-container {
             display: flex;
-            align-items: left;
+            align-items: center;
             margin-bottom: 15px;
         }
         .checkbox-container input {
@@ -201,6 +201,17 @@
                 }
             });
         }
+
+        function convertToUpperCase(event) {
+            event.target.value = event.target.value.toUpperCase();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], select');
+            inputs.forEach(input => {
+                input.addEventListener('blur', convertToUpperCase);
+            });
+        });
 
         checkSurveyStatus();
     </script>
