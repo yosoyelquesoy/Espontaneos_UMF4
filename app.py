@@ -172,12 +172,16 @@ def change_password():
         admin_data = load_admin()
         old_password = request.form['old_password']
         new_password = request.form['new_password']
-        if old_password == admin_data['password']:
+        confirm_password = request.form['confirm_password']
+
+        if old_password != admin_data['password']:
+            flash('Contraseña anterior incorrecta')
+        elif new_password != confirm_password:
+            flash('La nueva contraseña y la confirmación no coinciden')
+        else:
             admin_data['password'] = new_password
             save_admin(admin_data)
             return redirect(url_for('admin_dashboard', success='Contraseña actualizada con éxito.'))
-        else:
-            flash('Contraseña anterior incorrecta')
     return render_template('change_password.html')
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
