@@ -128,6 +128,10 @@
         .terms-popup button, .disclaimer-popup button {
             background-color: #dc3545;
         }
+        .disclaimer {
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -188,6 +192,10 @@
             </tr>
             {% endfor %}
         </table>
+        <div class="disclaimer">
+            <p>Elaborado por: Dr. Carlos Daniel Serrano Verdugo</p>
+            <p><a href="javascript:void(0);" onclick="showDisclaimer()">Descargo de responsabilidad</a></p>
+        </div>
     </div>
     <div id="disclaimerPopup" class="disclaimer-popup">
         <h3>Descargo de Responsabilidad</h3>
@@ -204,8 +212,5 @@
             document.getElementById('disclaimerPopup').style.display = 'block';
         }
     </script>
-    <div class="disclaimer">
-        <p><a href="javascript:void(0);" onclick="showDisclaimer()">Descargo de Responsabilidad</a></p>
-    </div>
 </body>
 </html>
