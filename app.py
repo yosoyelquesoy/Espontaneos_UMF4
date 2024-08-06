@@ -6,9 +6,17 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-CSV_FILE = 'encuestas.csv'
 SURVEY_STATUS_FILE = 'survey_status.txt'
 SURVEY_SCHEDULE_FILE = 'survey_schedule.txt'
+CSV_DIR = 'data_csv'
+
+if not os.path.exists(CSV_DIR):
+    os.makedirs(CSV_DIR)
+
+def get_csv_file():
+    today = datetime.now().strftime('%Y-%m-%d')
+    csv_file = os.path.join(CSV_DIR, f'encuestas_{today}.csv')
+    return csv_file
 
 def read_status():
     if os.path.exists(SURVEY_STATUS_FILE):
@@ -37,9 +45,15 @@ def submit():
         return jsonify({'success': False, 'message': 'La encuesta está fuera del horario permitido.'})
 
     data = request.form.to_dict()
-    with open(CSV_FILE, 'a', newline='') as f:
+    csv_file = get_csv_file()
+    file_exists = os.path.isfile(csv_file)
+
+    with open(csv_file, 'a', newline='') as f:
         writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(['name', 'email', 'ssn', 'agg', 'phone', 'consultorio', 'turno'])
         writer.writerow(data.values())
+
     return jsonify({'success': True, 'redirect': url_for('thankyou')})
 
 @app.route('/thankyou')
@@ -58,7 +72,24 @@ def admin():
 def admin_dashboard():
     if not session.get('admin'):
         return redirect(url_for('admin'))
-    return render_template('admin_dashboard.html')
+    csv_files = os.listdir(CSV_DIR)
+    return render_template('admin_dashboard.html', csv_files=csv_files)
+
+@app.route('/download/<filename>')
+def download(filename):
+    if not session.get('admin'):
+        return redirect(url_for('admin'))
+    csv_file = os.path.join(CSV_DIR, filename)
+    return send_file(csv_file, as_attachment=True)
+
+@app.route('/delete/<filename>', methods=['POST'])
+def delete(filename):
+    if not session.get('admin'):
+        return redirect(url_for('admin'))
+    csv_file = os.path.join(CSV_DIR, filename)
+    if os.path.exists(csv_file):
+        os.remove(csv_file)
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/update_survey_status', methods=['POST'])
 def update_survey_status():
@@ -78,12 +109,6 @@ def update_survey_schedule():
     with open(SURVEY_SCHEDULE_FILE, 'w') as f:
         f.write(f"{start_time},{end_time}")
     return jsonify({'success': True})
-
-@app.route('/download')
-def download():
-    if not session.get('admin'):
-        return redirect(url_for('admin'))
-    return send_file(CSV_FILE, as_attachment=True)
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
@@ -109,8 +134,4 @@ def survey_status():
     return jsonify({'is_open': read_status() == 'open'})
 
 if __name__ == '__main__':
-    if not os.path.exists(CSV_FILE):
-        with open(CSV_FILE, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['name', 'email', 'ssn', 'agg', 'phone', 'consultorio', 'turno'])
     app.run(debug=True)

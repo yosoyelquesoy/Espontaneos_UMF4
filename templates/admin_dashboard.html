@@ -75,8 +75,17 @@
             <input type="time" id="endTime" name="endTime">
             <button type="button" onclick="updateSurveySchedule()">Actualizar Horario</button>
         </form>
-        <a href="/download">Descargar Encuestas</a>
-        <a href="/change_password">Cambiar Contraseña</a>
+        <h3>Archivos CSV de Encuestas</h3>
+        <ul>
+            {% for csv_file in csv_files %}
+            <li>
+                <a href="/download/{{ csv_file }}">{{ csv_file }}</a>
+                <form action="/delete/{{ csv_file }}" method="POST" style="display:inline;">
+                    <button type="submit">Borrar</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
         <a href="/logout">Cerrar Sesión</a>
     </div>
 
