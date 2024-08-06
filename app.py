@@ -4,9 +4,13 @@ import os
 import json
 from datetime import datetime
 import pytz
+import logging
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+
+# Configuración de logging para errores
+logging.basicConfig(filename='error.log', level=logging.ERROR)
 
 CONFIG_FILE = 'config.json'
 ADMIN_FILE = 'admin.json'
@@ -54,29 +58,33 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    config = load_config()
-    if config['status'] == 'closed':
-        return jsonify({'success': False, 'message': 'La encuesta está cerrada.'})
+    try:
+        config = load_config()
+        if config['status'] == 'closed':
+            return jsonify({'success': False, 'message': 'La encuesta está cerrada.'})
 
-    current_time = datetime.now(pytz.timezone(TIMEZONE)).strftime('%H:%M')
-    start_time = config['start_time']
-    end_time = config['end_time']
-    if start_time and end_time and not (start_time <= current_time <= end_time):
-        return jsonify({'success': False, 'message': 'La encuesta está fuera del horario permitido.'})
+        current_time = datetime.now(pytz.timezone(TIMEZONE)).strftime('%H:%M')
+        start_time = config['start_time']
+        end_time = config['end_time']
+        if start_time and end_time and not (start_time <= current_time <= end_time):
+            return jsonify({'success': False, 'message': 'La encuesta está fuera del horario permitido.'})
 
-    data = {key: value.upper() for key, value in request.form.items()}
-    data['Fecha'] = datetime.now(pytz.timezone(TIMEZONE)).strftime('%Y-%m-%d')
-    data['Hora'] = datetime.now(pytz.timezone(TIMEZONE)).strftime('%H:%M:%S')
-    csv_file = get_csv_file()
-    file_exists = os.path.isfile(csv_file)
+        data = {key: value.upper() for key, value in request.form.items()}
+        data['Fecha'] = datetime.now(pytz.timezone(TIMEZONE)).strftime('%Y-%m-%d')
+        data['Hora'] = datetime.now(pytz.timezone(TIMEZONE)).strftime('%H:%M:%S')
+        csv_file = get_csv_file()
+        file_exists = os.path.isfile(csv_file)
 
-    with open(csv_file, 'a', newline='') as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            writer.writerow(['Fecha', 'Hora', 'Nombre', 'Email', 'NSS', 'Agregado', 'Teléfono', 'Consultorio', 'Turno'])
-        writer.writerow([data['Fecha'], data['Hora'], data['Nombre'], data['email'], data['NSS'], data['Agregado'], data['Telefono'], data['Consultorio'], data['Turno']])
+        with open(csv_file, 'a', newline='') as f:
+            writer = csv.writer(f)
+            if not file_exists:
+                writer.writerow(['Fecha', 'Hora', 'Nombre', 'Email', 'NSS', 'Agregado', 'Teléfono', 'Consultorio', 'Turno'])
+            writer.writerow([data['Fecha'], data['Hora'], data['Nombre'], data['email'], data['NSS'], data['Agregado'], data['Telefono'], data['Consultorio'], data['Turno']])
 
-    return jsonify({'success': True, 'redirect': url_for('thankyou')})
+        return jsonify({'success': True, 'redirect': url_for('thankyou')})
+    except Exception as e:
+        logging.error(f"Error in /submit: {e}")
+        return jsonify({'success': False, 'message': 'Error interno del servidor.'})
 
 @app.route('/thankyou')
 def thankyou():
@@ -84,86 +92,118 @@ def thankyou():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    if request.method == 'POST':
-        admin_data = load_admin()
-        if request.form['password'] == admin_data['password']:
-            session['admin'] = True
-            return redirect(url_for('admin_dashboard'))
-        else:
-            flash('Contraseña incorrecta')
-    return render_template('admin.html')
+    try:
+        if request.method == 'POST':
+            admin_data = load_admin()
+            if request.form['password'] == admin_data['password']:
+                session['admin'] = True
+                return redirect(url_for('admin_dashboard'))
+            else:
+                flash('Contraseña incorrecta')
+        return render_template('admin.html')
+    except Exception as e:
+        logging.error(f"Error in /admin: {e}")
+        return render_template('admin.html', error="Error interno del servidor.")
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    if not session.get('admin'):
+    try:
+        if not session.get('admin'):
+            return redirect(url_for('admin'))
+        config = load_config()
+        csv_files = os.listdir(CSV_DIR)
+        success_message = request.args.get('success')
+        return render_template('admin_dashboard.html', config=config, csv_files=csv_files, success=success_message)
+    except Exception as e:
+        logging.error(f"Error in /admin_dashboard: {e}")
         return redirect(url_for('admin'))
-    config = load_config()
-    csv_files = os.listdir(CSV_DIR)
-    success_message = request.args.get('success')
-    return render_template('admin_dashboard.html', config=config, csv_files=csv_files, success=success_message)
 
 @app.route('/download/<filename>')
 def download(filename):
-    if not session.get('admin'):
-        return redirect(url_for('admin'))
-    csv_file = os.path.join(CSV_DIR, filename)
-    return send_file(csv_file, as_attachment=True)
+    try:
+        if not session.get('admin'):
+            return redirect(url_for('admin'))
+        csv_file = os.path.join(CSV_DIR, filename)
+        return send_file(csv_file, as_attachment=True)
+    except Exception as e:
+        logging.error(f"Error in /download: {e}")
+        return redirect(url_for('admin_dashboard'))
 
 @app.route('/delete/<filename>', methods=['POST'])
 def delete(filename):
-    if not session.get('admin'):
-        return redirect(url_for('admin'))
-    csv_file = os.path.join(CSV_DIR, filename)
-    if os.path.exists(csv_file):
-        os.remove(csv_file)
-    return redirect(url_for('admin_dashboard'))
+    try:
+        if not session.get('admin'):
+            return redirect(url_for('admin'))
+        csv_file = os.path.join(CSV_DIR, filename)
+        if os.path.exists(csv_file):
+            os.remove(csv_file)
+        return redirect(url_for('admin_dashboard'))
+    except Exception as e:
+        logging.error(f"Error in /delete: {e}")
+        return redirect(url_for('admin_dashboard'))
 
 @app.route('/update_survey_status', methods=['POST'])
 def update_survey_status():
-    if not session.get('admin'):
-        return redirect(url_for('admin'))
-    status = request.form.get('status')
-    config = load_config()
-    config['status'] = status
-    save_config(config)
-    return redirect(url_for('admin_dashboard', success='Estado de la encuesta actualizado con éxito.'))
+    try:
+        if not session.get('admin'):
+            return redirect(url_for('admin'))
+        status = request.form.get('status')
+        config = load_config()
+        config['status'] = status
+        save_config(config)
+        return redirect(url_for('admin_dashboard', success='Estado de la encuesta actualizado con éxito.'))
+    except Exception as e:
+        logging.error(f"Error in /update_survey_status: {e}")
+        return redirect(url_for('admin_dashboard'))
 
 @app.route('/update_survey_schedule', methods=['POST'])
 def update_survey_schedule():
-    if not session.get('admin'):
-        return redirect(url_for('admin'))
-    start_time = request.form.get('start_time')
-    end_time = request.form.get('end_time')
-    config = load_config()
-    config['start_time'] = start_time
-    config['end_time'] = end_time
-    save_config(config)
-    return redirect(url_for('admin_dashboard', success='Horario de la encuesta actualizado con éxito.'))
+    try:
+        if not session.get('admin'):
+            return redirect(url_for('admin'))
+        start_time = request.form.get('start_time')
+        end_time = request.form.get('end_time')
+        config = load_config()
+        config['start_time'] = start_time
+        config['end_time'] = end_time
+        save_config(config)
+        return redirect(url_for('admin_dashboard', success='Horario de la encuesta actualizado con éxito.'))
+    except Exception as e:
+        logging.error(f"Error in /update_survey_schedule: {e}")
+        return redirect(url_for('admin_dashboard'))
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
-    if not session.get('admin'):
-        return redirect(url_for('admin'))
-    if request.method == 'POST':
-        admin_data = load_admin()
-        old_password = request.form['old_password']
-        new_password = request.form['new_password']
-        confirm_password = request.form['confirm_password']
+    try:
+        if not session.get('admin'):
+            return redirect(url_for('admin'))
+        if request.method == 'POST':
+            admin_data = load_admin()
+            old_password = request.form['old_password']
+            new_password = request.form['new_password']
+            confirm_password = request.form['confirm_password']
 
-        if old_password != admin_data['password']:
-            flash('Contraseña anterior incorrecta')
-        elif new_password != confirm_password:
-            flash('La nueva contraseña y la confirmación no coinciden')
-        else:
-            admin_data['password'] = new_password
-            save_admin(admin_data)
-            return redirect(url_for('admin_dashboard', success='Contraseña actualizada con éxito.'))
-    return render_template('change_password.html')
+            if old_password != admin_data['password']:
+                flash('Contraseña anterior incorrecta')
+            elif new_password != confirm_password:
+                flash('La nueva contraseña y la confirmación no coinciden')
+            else:
+                admin_data['password'] = new_password
+                save_admin(admin_data)
+                return redirect(url_for('admin_dashboard', success='Contraseña actualizada con éxito.'))
+        return render_template('change_password.html')
+    except Exception as e:
+        logging.error(f"Error in /change_password: {e}")
+        return redirect(url_for('admin'))
 
 @app.route('/logout')
 def logout():
-    session.pop('admin', None)
-    return redirect(url_for('index'))
+    try:
+        session.pop('admin', None)
+        return redirect(url_for('index'))
+    except Exception as e:
+        logging.error(f"Error in /logout: {e}")
+        return redirect(url_for('index'))
 
 @app.route('/privacy')
 def privacy():
@@ -171,8 +211,12 @@ def privacy():
 
 @app.route('/survey_status')
 def survey_status():
-    config = load_config()
-    return jsonify({'is_open': config['status'] == 'open'})
+    try:
+        config = load_config()
+        return jsonify({'is_open': config['status'] == 'open'})
+    except Exception as e:
+        logging.error(f"Error in /survey_status: {e}")
+        return jsonify({'is_open': False})
 
 if __name__ == '__main__':
     app.run(debug=True)
