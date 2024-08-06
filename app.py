@@ -112,7 +112,7 @@ def update_survey_status():
 
 @app.route('/update_survey_schedule', methods=['POST'])
 def update_survey_schedule():
-    if not session.get('admin'):
+    if not session.get('admin')):
         return redirect(url_for('admin'))
     start_time = request.json.get('startTime')
     end_time = request.json.get('endTime')
