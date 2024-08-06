@@ -13,7 +13,7 @@
             padding: 0;
         }
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 50px auto;
             padding: 20px;
             background-color: #fff;
@@ -24,119 +24,78 @@
             text-align: center;
             color: #333;
         }
-        form {
-            display: flex;
-            flex-direction: column;
+        .logout {
+            text-align: right;
         }
-        label {
-            margin-bottom: 5px;
-            color: #555;
-        }
-        input, select, button, a {
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        button, a {
-            background-color: #28a745;
-            color: #fff;
-            text-align: center;
+        .logout a {
+            color: #007bff;
             text-decoration: none;
-            cursor: pointer;
         }
-        button:hover, a:hover {
-            background-color: #218838;
+        .logout a:hover {
+            text-decoration: underline;
         }
-        button[type="button"] {
+        .admin-links {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .admin-links a {
+            padding: 10px 20px;
             background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
         }
-        button[type="button"]:hover {
+        .admin-links a:hover {
             background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Panel de Administración</h2>
-        <form id="surveyStatusForm">
-            <label for="surveyStatus">Estado de la Encuesta:</label>
-            <select id="surveyStatus" name="surveyStatus">
-                <option value="open" {% if config.status == 'open' %}selected{% endif %}>Abierta</option>
-                <option value="closed" {% if config.status == 'closed' %}selected{% endif %}>Cerrada</option>
-            </select>
-            <button type="button" onclick="updateSurveyStatus()">Actualizar Estado</button>
-        </form>
-        
-        <div class="new-line"></div>
-        
-        <form id="surveyScheduleForm">
-            <label for="startTime">Hora de Inicio:</label>
-            <input type="time" id="startTime" name="startTime" value="{{ config.start_time }}">
-            <label for="endTime">Hora de Fin:</label>
-            <input type="time" id="endTime" name="endTime" value="{{ config.end_time }}">
-            <button type="button" onclick="updateSurveySchedule()">Actualizar Horario</button>
-        </form>
-        
-        <div class="new-line"></div>
-        
-        <h3>Archivos CSV de Encuestas</h3>
-        <ul>
-            {% for csv_file in csv_files %}
-            <li>
-                <a href="/download/{{ csv_file }}">{{ csv_file }}</a>
-                <form action="/delete/{{ csv_file }}" method="POST" style="display:inline;">
-                    <button type="submit">Borrar</button>
-                </form>
-            </li>
+        <div class="logout">
+            <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+        </div>
+        <div class="admin-links">
+            <a href="{{ url_for('change_password') }}">Cambiar Contraseña</a>
+            <a href="{{ url_for('update_survey_status') }}">Estado de la Encuesta</a>
+            <a href="{{ url_for('update_survey_schedule') }}">Horario de la Encuesta</a>
+        </div>
+        <h3>Archivos de Encuestas</h3>
+        <table>
+            <tr>
+                <th>Nombre del Archivo</th>
+                <th>Acciones</th>
+            </tr>
+            {% for file in csv_files %}
+            <tr>
+                <td>{{ file }}</td>
+                <td>
+                    <a href="{{ url_for('download', filename=file) }}">Descargar</a>
+                    <form action="{{ url_for('delete', filename=file) }}" method="post" style="display:inline;">
+                        <button type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este archivo?');">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
             {% endfor %}
-        </ul>
-        
-        <div class="new-line"></div>
-        
-        <a href="/logout">Cerrar Sesión</a>
+        </table>
     </div>
-
-    <script>
-        function updateSurveyStatus() {
-            const status = document.getElementById('surveyStatus').value;
-            fetch('/update_survey_status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({status: status})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Estado de la encuesta actualizado.');
-                } else {
-                    alert('Error al actualizar el estado de la encuesta.');
-                }
-            });
-        }
-
-        function updateSurveySchedule() {
-            const startTime = document.getElementById('startTime').value;
-            const endTime = document.getElementById('endTime').value;
-            fetch('/update_survey_schedule', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({startTime: startTime, endTime: endTime})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Horario de la encuesta actualizado.');
-                } else {
-                    alert('Error al actualizar el horario de la encuesta.');
-                }
-            });
-        }
-    </script>
 </body>
 </html>
