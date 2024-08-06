@@ -95,6 +95,11 @@ def change_password():
         return redirect(url_for('admin_dashboard'))
     return render_template('change_password.html')
 
+@app.route('/logout')
+def logout():
+    session.pop('admin', None)
+    return redirect(url_for('index'))
+
 @app.route('/privacy')
 def privacy():
     return "Todos los datos personales recabados serán confidenciales y utilizados solo para el control interno de citas."
