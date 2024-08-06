@@ -1,14 +1,17 @@
-from flask import Flask, request, render_template, redirect, url_for, session, send_file, jsonify
+from flask import Flask, request, render_template, redirect, url_for, session, send_file, jsonify, flash
 import csv
 import os
 import json
 from datetime import datetime
 import pytz
+import smtplib
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
 CONFIG_FILE = 'config.json'
+ADMIN_FILE = 'admin.json'
 CSV_DIR = 'data_csv'
 TIMEZONE = 'Etc/GMT+7'  # GMT-7
 
@@ -28,6 +31,32 @@ def load_config():
 def save_config(config):
     with open(CONFIG_FILE, 'w') as f:
         json.dump(config, f)
+
+def load_admin():
+    if os.path.exists(ADMIN_FILE):
+        with open(ADMIN_FILE, 'r') as f:
+            return json.load(f)
+    return {
+        'email': 'admin@example.com',
+        'password': '1234'
+    }
+
+def save_admin(admin):
+    with open(ADMIN_FILE, 'w') as f:
+        json.dump(admin, f)
+
+def send_reset_email(email, reset_link):
+    msg = MIMEText(f"Para restablecer su contraseña, haga clic en el siguiente enlace: {reset_link}")
+    msg['Subject'] = 'Restablecimiento de contraseña'
+    msg['From'] = 'admin@example.com'
+    msg['To'] = email
+
+    try:
+        with smtplib.SMTP('smtp.example.com') as server:
+            server.login('user@example.com', 'password')
+            server.sendmail(msg['From'], [msg['To']], msg.as_string())
+    except Exception as e:
+        print(f"Error sending email: {e}")
 
 def get_csv_file():
     today = datetime.now(pytz.timezone(TIMEZONE)).strftime('%Y-%m-%d')
@@ -71,9 +100,12 @@ def thankyou():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     if request.method == 'POST':
-        if request.form['password'] == '1234':
+        admin_data = load_admin()
+        if request.form['password'] == admin_data['password']:
             session['admin'] = True
             return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Contraseña incorrecta')
     return render_template('admin.html')
 
 @app.route('/admin_dashboard')
@@ -81,9 +113,10 @@ def admin_dashboard():
     if not session.get('admin'):
         return redirect(url_for('admin'))
     config = load_config()
+    admin_data = load_admin()
     csv_files = os.listdir(CSV_DIR)
     success_message = request.args.get('success')
-    return render_template('admin_dashboard.html', config=config, csv_files=csv_files, success=success_message)
+    return render_template('admin_dashboard.html', config=config, csv_files=csv_files, success=success_message, admin_email=admin_data['email'])
 
 @app.route('/download/<filename>')
 def download(filename):
@@ -128,10 +161,29 @@ def change_password():
     if not session.get('admin'):
         return redirect(url_for('admin'))
     if request.method == 'POST':
+        admin_data = load_admin()
+        old_password = request.form['old_password']
         new_password = request.form['new_password']
-        # Lógica para cambiar la contraseña
-        return redirect(url_for('admin_dashboard'))
+        if old_password == admin_data['password']:
+            admin_data['password'] = new_password
+            save_admin(admin_data)
+            return redirect(url_for('admin_dashboard', success='Contraseña actualizada con éxito.'))
+        else:
+            flash('Contraseña anterior incorrecta')
     return render_template('change_password.html')
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        admin_data = load_admin()
+        if email == admin_data['email']:
+            reset_link = url_for('reset_password', _external=True)
+            send_reset_email(email, reset_link)
+            flash('Se ha enviado un enlace de restablecimiento a su correo electrónico.')
+        else:
+            flash('Correo electrónico no encontrado.')
+    return render_template('forgot_password.html')
 
 @app.route('/logout')
 def logout():
@@ -146,6 +198,16 @@ def privacy():
 def survey_status():
     config = load_config()
     return jsonify({'is_open': config['status'] == 'open'})
+
+@app.route('/update_admin_profile', methods=['POST'])
+def update_admin_profile():
+    if not session.get('admin'):
+        return redirect(url_for('admin'))
+    email = request.form['email']
+    admin_data = load_admin()
+    admin_data['email'] = email
+    save_admin(admin_data)
+    return redirect(url_for('admin_dashboard', success='Perfil del administrador actualizado con éxito.'))
 
 if __name__ == '__main__':
     app.run(debug=True)
