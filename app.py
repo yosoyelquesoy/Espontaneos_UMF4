@@ -4,14 +4,21 @@ import os
 import json
 from datetime import datetime
 import pytz
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail as SendGridMail
+from flask_mail import Mail, Message
+import logging
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-# Configuración de SendGrid
-SENDGRID_API_KEY = 'tu-sendgrid-api-key'  # Reemplaza con tu API Key de SendGrid
+# Configuración de Flask-Mail
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'cdencuestas@gmail.com'  # Reemplaza con tu correo de Gmail
+app.config['MAIL_PASSWORD'] = '#$%Contr4sena'  # Reemplaza con tu contraseña de Gmail
+
+mail = Mail(app)
 
 CONFIG_FILE = 'config.json'
 ADMIN_FILE = 'admin.json'
@@ -48,22 +55,14 @@ def save_admin(admin):
     with open(ADMIN_FILE, 'w') as f:
         json.dump(admin, f)
 
-# Función para enviar correos electrónicos utilizando SendGrid
+# Función para enviar correos electrónicos utilizando Gmail
 def send_reset_email(email, reset_link):
-    message = SendGridMail(
-        from_email='tu-email@example.com',  # Reemplaza con tu correo
-        to_emails=email,
-        subject='Restablecimiento de contraseña',
-        plain_text_content=f"Para restablecer su contraseña, haga clic en el siguiente enlace: {reset_link}"
-    )
     try:
-        sg = SendGridAPIClient(SENDGRID_API_KEY)
-        response = sg.send(message)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
+        msg = Message('Restablecimiento de contraseña', sender='cdencuestas@gmail.com', recipients=[email])
+        msg.body = f"Para restablecer su contraseña, haga clic en el siguiente enlace: {reset_link}"
+        mail.send(msg)
     except Exception as e:
-        print(f"Error sending email: {e}")
+        logging.error(f"Error sending email: {e}")
         raise
 
 def get_csv_file():
@@ -192,7 +191,7 @@ def forgot_password():
         if email == admin_data['email']:
             reset_link = url_for('reset_password', _external=True)
             try:
-                send_reset_email(email, reset_link)  # Utiliza SendGrid para enviar el correo
+                send_reset_email(email, reset_link)
                 flash('Se ha enviado un enlace de restablecimiento a su correo electrónico.')
             except Exception as e:
                 flash(f'Error al enviar el correo: {e}')
