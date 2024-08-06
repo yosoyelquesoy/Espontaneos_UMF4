@@ -4,40 +4,103 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Encuesta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        /* Estilo básico para el formulario */
-        body { font-family: Arial, sans-serif; }
-        form { max-width: 600px; margin: auto; padding: 1em; border: 1px solid #ccc; border-radius: 1em; }
-        div + div { margin-top: 1em; }
-        label { display: inline-block; width: 150px; text-align: right; }
-        input, select { width: calc(100% - 160px); padding: 0.5em; }
-        input[type="checkbox"] { width: auto; }
-        button { margin-left: 160px; padding: 0.5em 1em; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input, select {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .admin-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .admin-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
+        .terms-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .terms-popup h3 {
+            margin-top: 0;
+        }
+        .terms-popup button {
+            background-color: #dc3545;
+        }
     </style>
 </head>
 <body>
-    <h2>Formulario de Encuesta</h2>
-    <form id="surveyForm" onsubmit="handleSubmit(event)">
-        <div>
+    <div class="container">
+        <h2>Formulario de Encuesta</h2>
+        <form id="surveyForm" onsubmit="handleSubmit(event)">
             <label for="email">Correo Electrónico:</label>
             <input type="email" id="email" name="email" required>
-        </div>
-        <div>
+            
             <label for="ssn">Número de Seguro Social:</label>
-            <input type="text" id="ssn" name="ssn" pattern="\d{4}-\d{2}-\d{4}" placeholder="####-##-####" required>
-        </div>
-        <div>
+            <input type="text" id="ssn" name="ssn" placeholder="10 dígitos" pattern="\d{10}" required>
+            
             <label for="agg">Agregado:</label>
-            <input type="text" id="agg" name="agg" pattern="\d[A-Z]\d{4}[A-Z]{2}" placeholder="#A####AA" required>
-        </div>
-        <div>
+            <input type="text" id="agg" name="agg" placeholder="Formato: 1A2345BCDE" pattern="\d[A-Z]\d{4}[A-Z]{4}" required>
+            
             <label for="phone">Teléfono:</label>
             <input type="tel" id="phone" name="phone" pattern="\d{3}-\d{3}-\d{4}" placeholder="###-###-####" required>
-        </div>
-        <div>
+            
             <label for="consultorio">Consultorio:</label>
             <select id="consultorio" name="consultorio" required>
-                <option value="">Seleccione...</option>
+                <option value="" disabled selected>Seleccione...</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -52,29 +115,35 @@
                 <option value="12">12</option>
                 <option value="13">13</option>
             </select>
-        </div>
-        <div>
+            
             <label for="turno">Turno:</label>
             <select id="turno" name="turno" required>
+                <option value="" disabled selected>Seleccione...</option>
                 <option value="matutino">Matutino</option>
                 <option value="vespertino">Vespertino</option>
             </select>
-        </div>
-        <div>
+            
             <label for="terms">
                 <input type="checkbox" id="terms" name="terms" required>
                 Acepto los <a href="javascript:void(0);" onclick="showTerms()">Términos y Condiciones</a>
             </label>
-        </div>
-        <div>
+            
             <button type="submit">Enviar</button>
+        </form>
+        
+        <div class="admin-link">
+            <p>¿Eres administrador? <a href="/admin">Inicia sesión aquí</a></p>
         </div>
-    </form>
-
-    <div id="termsPopup" style="display:none;">
+    </div>
+    
+    <div id="termsPopup" class="terms-popup">
         <h3>Términos y Condiciones</h3>
         <p>Aquí van los términos y condiciones...</p>
         <button onclick="closeTerms()">Cerrar</button>
+    </div>
+
+    <div id="surveyClosedMessage" style="display:none;">
+        <h2>La encuesta está actualmente cerrada.</h2>
     </div>
 
     <script>
@@ -98,10 +167,26 @@
                 if (data.success) {
                     window.location.href = '/thankyou';
                 } else {
-                    alert('Hubo un error al enviar el formulario.');
+                    alert(data.message);
                 }
             });
         }
+
+        function checkSurveyStatus() {
+            fetch('/survey_status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_open) {
+                    document.getElementById('surveyFormContainer').style.display = 'block';
+                    document.getElementById('surveyClosedMessage').style.display = 'none';
+                } else {
+                    document.getElementById('surveyFormContainer').style.display = 'none';
+                    document.getElementId('surveyClosedMessage').style.display = 'block';
+                }
+            });
+        }
+
+        checkSurveyStatus();
     </script>
 </body>
 </html>
