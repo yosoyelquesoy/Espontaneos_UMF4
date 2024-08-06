@@ -10,7 +10,7 @@ app.secret_key = 'supersecretkey'
 
 CONFIG_FILE = 'config.json'
 CSV_DIR = 'data_csv'
-TIMEZONE = 'America/Hermosillo'
+TIMEZONE = 'America/Phoenix'  # Arizona Time
 
 if not os.path.exists(CSV_DIR):
     os.makedirs(CSV_DIR)
@@ -51,15 +51,16 @@ def submit():
         return jsonify({'success': False, 'message': 'La encuesta está fuera del horario permitido.'})
 
     data = {key: value.upper() for key, value in request.form.items()}
-    data['timestamp'] = datetime.now(pytz.timezone(TIMEZONE)).strftime('%Y-%m-%d %H:%M:%S')
+    data['Fecha'] = datetime.now(pytz.timezone(TIMEZONE)).strftime('%Y-%m-%d')
+    data['Hora'] = datetime.now(pytz.timezone(TIMEZONE)).strftime('%H:%M:%S')
     csv_file = get_csv_file()
     file_exists = os.path.isfile(csv_file)
 
     with open(csv_file, 'a', newline='') as f:
         writer = csv.writer(f)
         if not file_exists:
-            writer.writerow(['Nombre', 'email', 'NSS', 'Agregado', 'Telefono', 'Consultorio', 'Turno', 'timestamp'])
-        writer.writerow([data['Nombre'], data['email'], data['NSS'], data['Agregado'], data['Telefono'], data['Consultorio'], data['Turno'], data['timestamp']])
+            writer.writerow(['Fecha', 'Hora', 'Nombre', 'Email', 'NSS', 'Agregado', 'Teléfono', 'Consultorio', 'Turno'])
+        writer.writerow([data['Fecha'], data['Hora'], data['Nombre'], data['email'], data['NSS'], data['Agregado'], data['Telefono'], data['Consultorio'], data['Turno']])
 
     return jsonify({'success': True, 'redirect': url_for('thankyou')})
 
@@ -109,7 +110,7 @@ def update_survey_status():
     save_config(config)
     return jsonify({'success': True})
 
-@app.route('/update_survey_schedule', methods['POST'])
+@app.route('/update_survey_schedule', methods=['POST'])
 def update_survey_schedule():
     if not session.get('admin'):
         return redirect(url_for('admin'))
