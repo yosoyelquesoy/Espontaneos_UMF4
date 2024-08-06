@@ -4,21 +4,9 @@ import os
 import json
 from datetime import datetime
 import pytz
-from flask_mail import Mail, Message
-import logging
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
-
-# Configuración de Flask-Mail
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'cdencuestas@gmail.com'  # Reemplaza con tu correo de Gmail
-app.config['MAIL_PASSWORD'] = '#$%Contr4sena'  # Reemplaza con tu contraseña de Gmail
-
-mail = Mail(app)
 
 CONFIG_FILE = 'config.json'
 ADMIN_FILE = 'admin.json'
@@ -54,24 +42,6 @@ def load_admin():
 def save_admin(admin):
     with open(ADMIN_FILE, 'w') as f:
         json.dump(admin, f)
-
-# Función para enviar correos electrónicos utilizando Gmail
-def send_reset_email(email, reset_link):
-    try:
-        msg = Message('Restablecimiento de contraseña', sender='cdencuestas@gmail.com', recipients=[email])
-        msg.body = (
-            "Hola,\n\n"
-            "Recibimos una solicitud para restablecer la contraseña de su cuenta.\n"
-            "Para restablecer su contraseña, haga clic en el siguiente enlace:\n\n"
-            f"{reset_link}\n\n"
-            "Si no solicitó un restablecimiento de contraseña, por favor ignore este correo electrónico.\n\n"
-            "Gracias,\n"
-            "El equipo de Encuesta Web"
-        )
-        mail.send(msg)
-    except Exception as e:
-        logging.error(f"Error sending email: {e}")
-        raise
 
 def get_csv_file():
     today = datetime.now(pytz.timezone(TIMEZONE)).strftime('%Y-%m-%d')
@@ -128,10 +98,9 @@ def admin_dashboard():
     if not session.get('admin'):
         return redirect(url_for('admin'))
     config = load_config()
-    admin_data = load_admin()
     csv_files = os.listdir(CSV_DIR)
     success_message = request.args.get('success')
-    return render_template('admin_dashboard.html', config=config, csv_files=csv_files, success=success_message, admin_email=admin_data['email'])
+    return render_template('admin_dashboard.html', config=config, csv_files=csv_files, success=success_message)
 
 @app.route('/download/<filename>')
 def download(filename):
@@ -191,22 +160,6 @@ def change_password():
             return redirect(url_for('admin_dashboard', success='Contraseña actualizada con éxito.'))
     return render_template('change_password.html')
 
-@app.route('/forgot_password', methods=['GET', 'POST'])
-def forgot_password():
-    if request.method == 'POST':
-        email = request.form['email']
-        admin_data = load_admin()
-        if email == admin_data['email']:
-            reset_link = url_for('reset_password', _external=True)
-            try:
-                send_reset_email(email, reset_link)
-                flash('Se ha enviado un enlace de restablecimiento a su correo electrónico.')
-            except Exception as e:
-                flash(f'Error al enviar el correo: {e}')
-        else:
-            flash('Correo electrónico no encontrado.')
-    return render_template('forgot_password.html')
-
 @app.route('/logout')
 def logout():
     session.pop('admin', None)
@@ -220,16 +173,6 @@ def privacy():
 def survey_status():
     config = load_config()
     return jsonify({'is_open': config['status'] == 'open'})
-
-@app.route('/update_admin_profile', methods=['POST'])
-def update_admin_profile():
-    if not session.get('admin'):
-        return redirect(url_for('admin'))
-    email = request.form['email']
-    admin_data = load_admin()
-    admin_data['email'] = email
-    save_admin(admin_data)
-    return redirect(url_for('admin_dashboard', success='Perfil del administrador actualizado con éxito.'))
 
 if __name__ == '__main__':
     app.run(debug=True)
