@@ -59,7 +59,7 @@ def submit():
         writer = csv.writer(f)
         if not file_exists:
             writer.writerow(['name', 'email', 'ssn', 'agg', 'phone', 'consultorio', 'turno', 'timestamp'])
-        writer.writerow(data.values())
+        writer.writerow([data['name'], data['email'], data['ssn'], data['agg'], data['phone'], data['consultorio'], data['turno'], data['timestamp']])
 
     return jsonify({'success': True, 'redirect': url_for('thankyou')})
 
