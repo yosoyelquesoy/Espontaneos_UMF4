@@ -95,6 +95,24 @@
         .hidden {
             display: none;
         }
+        .terms-popup, .disclaimer-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .terms-popup h3, .disclaimer-popup h3 {
+            margin-top: 0;
+        }
+        .terms-popup button, .disclaimer-popup button {
+            background-color: #dc3545;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -170,6 +188,12 @@
             </tr>
             {% endfor %}
         </table>
+    </div>
+    <div id="disclaimerPopup" class="disclaimer-popup">
+        <h3>Descargo de Responsabilidad</h3>
+        <p>
+            Esta herramienta ha sido creada exclusivamente con fines académicos e ilustrativos. El creador no se hace responsable del uso que se le dé fuera de este contexto. Su aplicación en entornos reales es bajo la responsabilidad del usuario.</p>
+        <button onclick="closeDisclaimer()">Cerrar</button>
     </div>
 </body>
 </html>
