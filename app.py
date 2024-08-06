@@ -61,6 +61,7 @@ def send_reset_email(email, reset_link):
         mail.send(msg)
     except Exception as e:
         print(f"Error sending email: {e}")
+        raise
 
 def get_csv_file():
     today = datetime.now(pytz.timezone(TIMEZONE)).strftime('%Y-%m-%d')
