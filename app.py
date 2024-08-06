@@ -40,7 +40,7 @@ def submit():
     with open(CSV_FILE, 'a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(data.values())
-    return redirect(url_for('thankyou'))
+    return jsonify({'success': True, 'redirect': url_for('thankyou')})
 
 @app.route('/thankyou')
 def thankyou():

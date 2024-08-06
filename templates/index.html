@@ -85,7 +85,7 @@
 <body>
     <div class="container">
         <h2>Solicitud de atención a paciente sin cita</h2>
-        <form id="surveyForm" onsubmit="handleSubmit(event)">
+        <form id="surveyForm" method="POST" onsubmit="handleSubmit(event)">
             <label for="name">Nombre Completo:</label>
             <input type="text" id="name" name="name" required>
             
@@ -180,10 +180,10 @@
             .then(response => response.json())
             .then(data => {
                 if (data.is_open) {
-                    document.getElementById('surveyFormContainer').style.display = 'block';
+                    document.getElementById('surveyForm').style.display = 'block';
                     document.getElementById('surveyClosedMessage').style.display = 'none';
                 } else {
-                    document.getElementById('surveyFormContainer').style.display = 'none';
+                    document.getElementById('surveyForm').style.display = 'none';
                     document.getElementById('surveyClosedMessage').style.display = 'block';
                 }
             });
