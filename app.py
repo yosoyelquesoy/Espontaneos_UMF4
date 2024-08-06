@@ -40,11 +40,11 @@ def submit():
     with open(CSV_FILE, 'a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(data.values())
-    return jsonify({'success': True})
+    return redirect(url_for('thankyou'))
 
 @app.route('/thankyou')
 def thankyou():
-    return "¡Gracias por su envío!"
+    return render_template('thankyou.html')
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
@@ -112,5 +112,5 @@ if __name__ == '__main__':
     if not os.path.exists(CSV_FILE):
         with open(CSV_FILE, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['email', 'ssn', 'agg', 'phone', 'consultorio', 'turno'])
+            writer.writerow(['name', 'email', 'ssn', 'agg', 'phone', 'consultorio', 'turno'])
     app.run(debug=True)
