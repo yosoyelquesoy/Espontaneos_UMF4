@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitud de atención a paciente sin cita</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,7 +32,7 @@
             margin-bottom: 5px;
             color: #555;
         }
-        input, select {
+        input, select, textarea {
             margin-bottom: 15px;
             padding: 10px;
             border: 1px solid #ddd;
@@ -40,9 +41,21 @@
             width: 100%;
             box-sizing: border-box;
         }
+        input[type="text"], input[type="email"], input[type="tel"] {
+            text-transform: uppercase;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .checkbox-container input {
+            width: auto;
+            margin-right: 10px;
+        }
         button {
             padding: 10px;
-            background-color: #007bff;
+            background-color: #28a745;
             color: #fff;
             border: none;
             border-radius: 5px;
@@ -52,102 +65,175 @@
             box-sizing: border-box;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #218838;
         }
-        .policy {
-            display: flex;
-            text-align: left;
-            align-items: left;
-            font-size: 14px;
-            color: #555;
-        }
-        .policy input {
-            margin-right: 10px;
-        }
-        .footer {
+        .admin-link {
             text-align: center;
-            align-items: center;
-            font-size: 12px;
-            color: #555;
             margin-top: 20px;
         }
-        .footer a {
+        .admin-link a {
             color: #007bff;
             text-decoration: none;
         }
-        .footer a:hover {
+        .admin-link a:hover {
             text-decoration: underline;
+        }
+        .terms-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .terms-popup h3 {
+            margin-top: 0;
+        }
+        .terms-popup button {
+            background-color: #dc3545;
+        }
+        .timestamp {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Solicitud de atención a paciente sin cita</h2>
-        <form id="survey-form">
-            <label for="name">Nombre Completo:</label>
-            <input type="text" id="name" name="name" required>
-
+        <form id="surveyForm" method="POST" action="/submit" onsubmit="handleSubmit(event)">
+            <label for="Nombre">Nombre Completo:</label>
+            <input type="text" id="Nombre" name="Nombre" style="text-transform: uppercase;" required>
+            
             <label for="email">Correo Electrónico:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="ssn">Número de Seguro Social (10 dígitos):</label>
-            <input type="text" id="ssn" name="ssn" required>
-
-            <label for="agg">Agregado:</label>
-            <input type="text" id="agg" name="agg" required>
-
-            <label for="phone">Teléfono:</label>
-            <input type="tel" id="phone" name="phone" required>
-
-            <label for="consultorio">Consultorio:</label>
-            <select id="consultorio" name="consultorio" required>
+            <input type="email" id="email" name="email" style="text-transform: uppercase;" required>
+            
+            <label for="NSS">Número de Seguro Social:</label>
+            <input type="text" id="NSS" name="NSS" style="text-transform: uppercase;" required>
+            
+            <label for="Agregado">Agregado:</label>
+            <input type="text" id="Agregado" name="Agregado" style="text-transform: uppercase;" required>
+            
+            <label for="Telefono">Teléfono:</label>
+            <input type="tel" id="Telefono" name="Telefono" style="text-transform: uppercase;" required>
+            
+            <label for="Consultorio">Consultorio:</label>
+            <select id="Consultorio" name="Consultorio" required>
                 <option value="" disabled selected>Seleccione...</option>
-                {% for i in range(1, 14) %}
-                <option value="{{ i }}">Consultorio {{ i }}</option>
-                {% endfor %}
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
             </select>
-
-            <label for="turno">Turno:</label>
-            <select id="turno" name="turno" required>
+            
+            <label for="Turno">Turno:</label>
+            <select id="Turno" name="Turno" required>
                 <option value="" disabled selected>Seleccione...</option>
                 <option value="matutino">Matutino</option>
                 <option value="vespertino">Vespertino</option>
             </select>
-
-            <div class="policy">
-                <input type="checkbox" id="accept" name="accept" required>
-                <label for="accept">Acepto las <a href="#" onclick="openDisclaimer()">políticas de privacidad</a>.</label>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">Acepto las <a href="javascript:void(0);" onclick="showTerms()">políticas de privacidad</a></label>
             </div>
-
+            
             <button type="submit">Enviar</button>
         </form>
 
-        <div class="footer">
-            Elaborado por: Dr. Carlos Daniel Serrano Verdugo
-            <br>
-            <a href="#" onclick="openDisclaimer()">Descargo de responsabilidad</a>
+        <div class="timestamp" id="timestamp"></div>
+        
+        <div class="admin-link">
+            <p>¿Eres administrador? <a href="/admin">Inicia sesión aquí</a></p>
         </div>
     </div>
+    
+    <div id="termsPopup" class="terms-popup">
+        <h3>Políticas de Privacidad</h3>
+        <p>Toda la información proporcionada será confidencial y tratada exclusivamente para el manejo interno en el apoyo de su cita.</p>
+        <button onclick="closeTerms()">Cerrar</button>
+    </div>
 
-    <!-- Popup de Descargo de Responsabilidad -->
-    <div id="disclaimer-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background-color:#fff; padding:20px; box-shadow:0 0 10px rgba(0, 0, 0, 0.1); border-radius:10px;">
-        <h3>Descargo de Responsabilidad</h3>
-        <p>Esta herramienta ha sido creada exclusivamente con fines académicos e ilustrativos. No me hago responsable del uso que se le dé fuera de este contexto educativo. Su aplicación en entornos reales es bajo la responsabilidad del usuario.</p>
-        <button onclick="closeDisclaimer()">Cerrar</button>
+    <div id="surveyClosedMessage" style="display:none;">
+        <h2>La encuesta está actualmente cerrada.</h2>
     </div>
 
     <script>
-        function openDisclaimer() {
-            document.getElementById('disclaimer-popup').style.display = 'block';
+        function showTerms() {
+            document.getElementById('termsPopup').style.display = 'block';
         }
 
-        function closeDisclaimer() {
-            document.getElementById('disclaimer-popup').style.display = 'none';
+        function closeTerms() {
+            document.getElementById('termsPopup').style.display = 'none';
         }
 
-        document.getElementById('survey-form').addEventListener('submit', function(event) {
+        function handleSubmit(event) {
             event.preventDefault();
-            // Aquí iría la lógica para enviar el formulario usando fetch o XMLHttpRequest
+            const form = document.getElementById('surveyForm');
+            const formData = new FormData(form);
+            
+            // Convertir todos los campos de texto a mayúsculas
+            for (let [key, value] of formData.entries()) {
+                if (typeof value === 'string') {
+                    formData.set(key, value.toUpperCase());
+                }
+            }
+
+            fetch('/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        function checkSurveyStatus() {
+            fetch('/survey_status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_open) {
+                    document.getElementById('surveyForm').style.display = 'block';
+                    document.getElementById('surveyClosedMessage').style.display = 'none';
+                } else {
+                    document.getElementById('surveyForm').style.display = 'none';
+                    document.getElementById('surveyClosedMessage').style.display = 'block';
+                }
+            });
+        }
+
+        function displayCurrentDateTime() {
+            const now = new Date();
+            const date = now.toLocaleDateString();
+            const time = now.toLocaleTimeString();
+            document.getElementById('timestamp').textContent = `Fecha y Hora actuales: ${date} ${time}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayCurrentDateTime();
+            setInterval(displayCurrentDateTime, 1000); // Actualizar la hora cada segundo
+
+            checkSurveyStatus();
         });
     </script>
 </body>
