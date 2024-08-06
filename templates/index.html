@@ -184,7 +184,16 @@
 
         function handleSubmit(event) {
             event.preventDefault();
-            const formData = new FormData(document.getElementById('surveyForm'));
+            const form = document.getElementById('surveyForm');
+            const formData = new FormData(form);
+            
+            // Convertir todos los campos de texto a mayúsculas
+            for (let [key, value] of formData.entries()) {
+                if (typeof value === 'string') {
+                    formData.set(key, value.toUpperCase());
+                }
+            }
+
             fetch('/submit', {
                 method: 'POST',
                 body: formData
