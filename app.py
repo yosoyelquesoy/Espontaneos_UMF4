@@ -5,19 +5,26 @@ import os
 import json
 from datetime import datetime
 import pytz
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail as SendGridMail
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-# Configuración de Flask-Mail
-app.config['MAIL_SERVER'] = 'smtp.example.com'  # Reemplaza con tu servidor SMTP
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'tu-email@example.com'  # Reemplaza con tu correo
-app.config['MAIL_PASSWORD'] = 'tu-contraseña'  # Reemplaza con tu contraseña
-app.config['MAIL_DEFAULT_SENDER'] = 'tu-email@example.com'  # Reemplaza con tu correo
+# Configuración de Flask-Mail con Gmail SMTP
+# Descomenta estas líneas si quieres usar Gmail SMTP
+# app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+# app.config['MAIL_PORT'] = 587
+# app.config['MAIL_USE_TLS'] = True
+# app.config['MAIL_USERNAME'] = 'tu-email@gmail.com'  # Reemplaza con tu correo de Gmail
+# app.config['MAIL_PASSWORD'] = 'tu-contraseña-de-gmail'  # Reemplaza con tu contraseña de Gmail
+# app.config['MAIL_DEFAULT_SENDER'] = 'tu-email@gmail.com'  # Reemplaza con tu correo de Gmail
 
-mail = Mail(app)
+# mail = Mail(app)
+
+# Configuración de SendGrid
+# Descomenta estas líneas si quieres usar SendGrid
+SENDGRID_API_KEY = 'SK585fcc8a0c23e5d962f583e85a167050'  # Reemplaza con tu API Key de SendGrid
 
 CONFIG_FILE = 'config.json'
 ADMIN_FILE = 'admin.json'
@@ -54,11 +61,31 @@ def save_admin(admin):
     with open(ADMIN_FILE, 'w') as f:
         json.dump(admin, f)
 
-def send_reset_email(email, reset_link):
+# Función para enviar correos electrónicos utilizando Gmail SMTP
+# Descomenta esta función si quieres usar Gmail SMTP
+# def send_reset_email_gmail(email, reset_link):
+#     try:
+#         msg = Message('Restablecimiento de contraseña', recipients=[email])
+#         msg.body = f"Para restablecer su contraseña, haga clic en el siguiente enlace: {reset_link}"
+#         mail.send(msg)
+#     except Exception as e:
+#         print(f"Error sending email: {e}")
+#         raise
+
+# Función para enviar correos electrónicos utilizando SendGrid
+def send_reset_email_sendgrid(email, reset_link):
+    message = SendGridMail(
+        from_email='no_responder@encuesta.com',  # Reemplaza con tu correo
+        to_emails=email,
+        subject='Restablecimiento de contraseña',
+        plain_text_content=f"Para restablecer su contraseña, haga clic en el siguiente enlace: {reset_link}"
+    )
     try:
-        msg = Message('Restablecimiento de contraseña', recipients=[email])
-        msg.body = f"Para restablecer su contraseña, haga clic en el siguiente enlace: {reset_link}"
-        mail.send(msg)
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
     except Exception as e:
         print(f"Error sending email: {e}")
         raise
@@ -184,7 +211,9 @@ def forgot_password():
         admin_data = load_admin()
         if email == admin_data['email']:
             reset_link = url_for('reset_password', _external=True)
-            send_reset_email(email, reset_link)
+            # Elige la función de envío de correo que prefieras
+            # send_reset_email_gmail(email, reset_link)  # Descomenta esta línea si usas Gmail SMTP
+            send_reset_email_sendgrid(email, reset_link)  # Descomenta esta línea si usas SendGrid
             flash('Se ha enviado un enlace de restablecimiento a su correo electrónico.')
         else:
             flash('Correo electrónico no encontrado.')
