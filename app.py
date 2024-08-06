@@ -3,12 +3,14 @@ import csv
 import os
 import json
 from datetime import datetime
+import pytz
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
 CONFIG_FILE = 'config.json'
 CSV_DIR = 'data_csv'
+TIMEZONE = 'America/Hermosillo'
 
 if not os.path.exists(CSV_DIR):
     os.makedirs(CSV_DIR)
@@ -28,7 +30,7 @@ def save_config(config):
         json.dump(config, f)
 
 def get_csv_file():
-    today = datetime.now().strftime('%Y-%m-%d')
+    today = datetime.now(pytz.timezone(TIMEZONE)).strftime('%Y-%m-%d')
     csv_file = os.path.join(CSV_DIR, f'encuestas_{today}.csv')
     return csv_file
 
@@ -42,7 +44,7 @@ def submit():
     if config['status'] == 'closed':
         return jsonify({'success': False, 'message': 'La encuesta está cerrada.'})
 
-    current_time = datetime.now().strftime('%H:%M')
+    current_time = datetime.now(pytz.timezone(TIMEZONE)).strftime('%H:%M')
     start_time = config['start_time']
     end_time = config['end_time']
     if start_time and end_time and not (start_time <= current_time <= end_time):
