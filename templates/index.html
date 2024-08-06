@@ -78,7 +78,7 @@
         .admin-link a:hover {
             text-decoration: underline;
         }
-        .terms-popup {
+        .terms-popup, .disclaimer-popup {
             display: none;
             position: fixed;
             top: 50%;
@@ -90,10 +90,10 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .terms-popup h3 {
+        .terms-popup h3, .disclaimer-popup h3 {
             margin-top: 0;
         }
-        .terms-popup button {
+        .terms-popup button, .disclaimer-popup button {
             background-color: #dc3545;
         }
         .timestamp {
@@ -101,6 +101,19 @@
             margin-top: 20px;
             font-size: 14px;
             color: #555;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #555;
+            margin-top: 20px;
+        }
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -161,12 +174,24 @@
         <div class="admin-link">
             <p>¿Eres administrador? <a href="/admin">Inicia sesión aquí</a></p>
         </div>
+
+        <div class="footer">
+            Elaborado por: Dr. Carlos Daniel Serrano Verdugo
+            <br>
+            <a href="javascript:void(0);" onclick="showDisclaimer()">Descargo de responsabilidad</a>
+        </div>
     </div>
     
     <div id="termsPopup" class="terms-popup">
         <h3>Políticas de Privacidad</h3>
         <p>Toda la información proporcionada será confidencial y tratada exclusivamente para el manejo interno en el apoyo de su cita.</p>
         <button onclick="closeTerms()">Cerrar</button>
+    </div>
+
+    <div id="disclaimerPopup" class="disclaimer-popup">
+        <h3>Descargo de Responsabilidad</h3>
+        <p>Esta herramienta ha sido creada exclusivamente con fines académicos e ilustrativos. No me hago responsable del uso que se le dé fuera de este contexto educativo. Su aplicación en entornos reales es bajo la responsabilidad del usuario.</p>
+        <button onclick="closeDisclaimer()">Cerrar</button>
     </div>
 
     <div id="surveyClosedMessage" style="display:none;">
@@ -180,6 +205,14 @@
 
         function closeTerms() {
             document.getElementById('termsPopup').style.display = 'none';
+        }
+
+        function showDisclaimer() {
+            document.getElementById('disclaimerPopup').style.display = 'block';
+        }
+
+        function closeDisclaimer() {
+            document.getElementById('disclaimerPopup').style.display = 'none';
         }
 
         function handleSubmit(event) {
