@@ -41,6 +41,9 @@
             width: 100%;
             box-sizing: border-box;
         }
+        input[type="text"], input[type="email"], input[type="tel"] {
+            text-transform: uppercase;
+        }
         .checkbox-container {
             display: flex;
             align-items: center;
@@ -210,10 +213,6 @@
             });
         }
 
-        function convertToUpperCase(event) {
-            event.target.value = event.target.value.toUpperCase();
-        }
-
         function displayCurrentDateTime() {
             const now = new Date();
             const date = now.toLocaleDateString();
@@ -222,13 +221,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], select');
-            inputs.forEach(input => {
-                input.addEventListener('blur', convertToUpperCase);
-            });
-
             displayCurrentDateTime();
-            setInterval(displayCurrentDateTime, 1000); // Update the time every second
+            setInterval(displayCurrentDateTime, 1000); // Actualizar la hora cada segundo
 
             checkSurveyStatus();
         });
