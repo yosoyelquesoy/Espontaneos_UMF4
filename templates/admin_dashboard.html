@@ -4,27 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input, select, button, a {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button, a {
+            background-color: #28a745;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        button:hover, a:hover {
+            background-color: #218838;
+        }
+        button[type="button"] {
+            background-color: #007bff;
+        }
+        button[type="button"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h2>Panel de Administración</h2>
-    <form id="surveyStatusForm">
-        <label for="surveyStatus">Estado de la Encuesta:</label>
-        <select id="surveyStatus" name="surveyStatus">
-            <option value="open">Abierta</option>
-            <option value="closed">Cerrada</option>
-        </select>
-        <button type="button" onclick="updateSurveyStatus()">Actualizar Estado</button>
-    </form>
-    <form id="surveyScheduleForm">
-        <label for="startTime">Hora de Inicio:</label>
-        <input type="time" id="startTime" name="startTime">
-        <label for="endTime">Hora de Fin:</label>
-        <input type="time" id="endTime" name="endTime">
-        <button type="button" onclick="updateSurveySchedule()">Actualizar Horario</button>
-    </form>
-    <a href="/download">Descargar Encuestas</a>
-    <a href="/change_password">Cambiar Contraseña</a>
-    <a href="/logout">Cerrar Sesión</a>
+    <div class="container">
+        <h2>Panel de Administración</h2>
+        <form id="surveyStatusForm">
+            <label for="surveyStatus">Estado de la Encuesta:</label>
+            <select id="surveyStatus" name="surveyStatus">
+                <option value="open">Abierta</option>
+                <option value="closed">Cerrada</option>
+            </select>
+            <button type="button" onclick="updateSurveyStatus()">Actualizar Estado</button>
+        </form>
+        <form id="surveyScheduleForm">
+            <label for="startTime">Hora de Inicio:</label>
+            <input type="time" id="startTime" name="startTime">
+            <label for="endTime">Hora de Fin:</label>
+            <input type="time" id="endTime" name="endTime">
+            <button type="button" onclick="updateSurveySchedule()">Actualizar Horario</button>
+        </form>
+        <a href="/download">Descargar Encuestas</a>
+        <a href="/change_password">Cambiar Contraseña</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </div>
 
     <script>
         function updateSurveyStatus() {
