@@ -1,0 +1,19 @@
+{
+    "name": "encuesta_web",
+    "version": "1.0.0",
+    "description": "Proyecto de encuesta web",
+    "main": "index.js",
+    "scripts": {
+      "start": "node app.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "engines": {
+      "node": "20.15.1"
+    },
+    "dependencies": {
+      "flask": "^2.0.2",
+      "flask-mail": "^0.9.1"
+    }
+  }
+  
