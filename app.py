@@ -59,7 +59,15 @@ def save_admin(admin):
 def send_reset_email(email, reset_link):
     try:
         msg = Message('Restablecimiento de contraseña', sender='cdencuestas@gmail.com', recipients=[email])
-        msg.body = f"Para restablecer su contraseña, haga clic en el siguiente enlace: {reset_link}"
+        msg.body = (
+            "Hola,\n\n"
+            "Recibimos una solicitud para restablecer la contraseña de su cuenta.\n"
+            "Para restablecer su contraseña, haga clic en el siguiente enlace:\n\n"
+            f"{reset_link}\n\n"
+            "Si no solicitó un restablecimiento de contraseña, por favor ignore este correo electrónico.\n\n"
+            "Gracias,\n"
+            "El equipo de Encuesta Web"
+        )
         mail.send(msg)
     except Exception as e:
         logging.error(f"Error sending email: {e}")
