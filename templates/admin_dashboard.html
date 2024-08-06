@@ -63,18 +63,24 @@
         <form id="surveyStatusForm">
             <label for="surveyStatus">Estado de la Encuesta:</label>
             <select id="surveyStatus" name="surveyStatus">
-                <option value="open">Abierta</option>
-                <option value="closed">Cerrada</option>
+                <option value="open" {% if config.status == 'open' %}selected{% endif %}>Abierta</option>
+                <option value="closed" {% if config.status == 'closed' %}selected{% endif %}>Cerrada</option>
             </select>
             <button type="button" onclick="updateSurveyStatus()">Actualizar Estado</button>
         </form>
+        
+        <div class="new-line"></div>
+        
         <form id="surveyScheduleForm">
             <label for="startTime">Hora de Inicio:</label>
-            <input type="time" id="startTime" name="startTime">
+            <input type="time" id="startTime" name="startTime" value="{{ config.start_time }}">
             <label for="endTime">Hora de Fin:</label>
-            <input type="time" id="endTime" name="endTime">
+            <input type="time" id="endTime" name="endTime" value="{{ config.end_time }}">
             <button type="button" onclick="updateSurveySchedule()">Actualizar Horario</button>
         </form>
+        
+        <div class="new-line"></div>
+        
         <h3>Archivos CSV de Encuestas</h3>
         <ul>
             {% for csv_file in csv_files %}
@@ -86,6 +92,9 @@
             </li>
             {% endfor %}
         </ul>
+        
+        <div class="new-line"></div>
+        
         <a href="/logout">Cerrar Sesión</a>
     </div>
 

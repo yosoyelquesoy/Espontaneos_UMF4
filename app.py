@@ -1,34 +1,36 @@
 from flask import Flask, request, render_template, redirect, url_for, session, send_file, jsonify
 import csv
 import os
+import json
 from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-SURVEY_STATUS_FILE = 'survey_status.txt'
-SURVEY_SCHEDULE_FILE = 'survey_schedule.txt'
+CONFIG_FILE = 'config.json'
 CSV_DIR = 'data_csv'
 
 if not os.path.exists(CSV_DIR):
     os.makedirs(CSV_DIR)
 
+def load_config():
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, 'r') as f:
+            return json.load(f)
+    return {
+        'status': 'closed',
+        'start_time': None,
+        'end_time': None
+    }
+
+def save_config(config):
+    with open(CONFIG_FILE, 'w') as f:
+        json.dump(config, f)
+
 def get_csv_file():
     today = datetime.now().strftime('%Y-%m-%d')
     csv_file = os.path.join(CSV_DIR, f'encuestas_{today}.csv')
     return csv_file
-
-def read_status():
-    if os.path.exists(SURVEY_STATUS_FILE):
-        with open(SURVEY_STATUS_FILE, 'r') as f:
-            return f.read().strip()
-    return 'closed'
-
-def read_schedule():
-    if os.path.exists(SURVEY_SCHEDULE_FILE):
-        with open(SURVEY_SCHEDULE_FILE, 'r') as f:
-            return f.read().strip().split(',')
-    return None, None
 
 @app.route('/')
 def index():
@@ -36,11 +38,13 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    if read_status() == 'closed':
+    config = load_config()
+    if config['status'] == 'closed':
         return jsonify({'success': False, 'message': 'La encuesta está cerrada.'})
-    
-    start_time, end_time = read_schedule()
+
     current_time = datetime.now().strftime('%H:%M')
+    start_time = config['start_time']
+    end_time = config['end_time']
     if start_time and end_time and not (start_time <= current_time <= end_time):
         return jsonify({'success': False, 'message': 'La encuesta está fuera del horario permitido.'})
 
@@ -72,8 +76,9 @@ def admin():
 def admin_dashboard():
     if not session.get('admin'):
         return redirect(url_for('admin'))
+    config = load_config()
     csv_files = os.listdir(CSV_DIR)
-    return render_template('admin_dashboard.html', csv_files=csv_files)
+    return render_template('admin_dashboard.html', config=config, csv_files=csv_files)
 
 @app.route('/download/<filename>')
 def download(filename):
@@ -96,8 +101,9 @@ def update_survey_status():
     if not session.get('admin'):
         return redirect(url_for('admin'))
     status = request.json.get('status')
-    with open(SURVEY_STATUS_FILE, 'w') as f:
-        f.write(status)
+    config = load_config()
+    config['status'] = status
+    save_config(config)
     return jsonify({'success': True})
 
 @app.route('/update_survey_schedule', methods=['POST'])
@@ -106,8 +112,10 @@ def update_survey_schedule():
         return redirect(url_for('admin'))
     start_time = request.json.get('startTime')
     end_time = request.json.get('endTime')
-    with open(SURVEY_SCHEDULE_FILE, 'w') as f:
-        f.write(f"{start_time},{end_time}")
+    config = load_config()
+    config['start_time'] = start_time
+    config['end_time'] = end_time
+    save_config(config)
     return jsonify({'success': True})
 
 @app.route('/change_password', methods=['GET', 'POST'])
@@ -131,7 +139,8 @@ def privacy():
 
 @app.route('/survey_status')
 def survey_status():
-    return jsonify({'is_open': read_status() == 'open'})
+    config = load_config()
+    return jsonify({'is_open': config['status'] == 'open'})
 
 if __name__ == '__main__':
     app.run(debug=True)
