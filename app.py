@@ -1,14 +1,23 @@
 from flask import Flask, request, render_template, redirect, url_for, session, send_file, jsonify, flash
+from flask_mail import Mail, Message
 import csv
 import os
 import json
 from datetime import datetime
 import pytz
-import smtplib
-from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+
+# Configuración de Flask-Mail
+app.config['MAIL_SERVER'] = 'smtp.example.com'  # Reemplaza con tu servidor SMTP
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'tu-email@example.com'  # Reemplaza con tu correo
+app.config['MAIL_PASSWORD'] = 'tu-contraseña'  # Reemplaza con tu contraseña
+app.config['MAIL_DEFAULT_SENDER'] = 'tu-email@example.com'  # Reemplaza con tu correo
+
+mail = Mail(app)
 
 CONFIG_FILE = 'config.json'
 ADMIN_FILE = 'admin.json'
@@ -46,15 +55,10 @@ def save_admin(admin):
         json.dump(admin, f)
 
 def send_reset_email(email, reset_link):
-    msg = MIMEText(f"Para restablecer su contraseña, haga clic en el siguiente enlace: {reset_link}")
-    msg['Subject'] = 'Restablecimiento de contraseña'
-    msg['From'] = 'admin@example.com'
-    msg['To'] = email
-
     try:
-        with smtplib.SMTP('smtp.example.com') as server:
-            server.login('user@example.com', 'password')
-            server.sendmail(msg['From'], [msg['To']], msg.as_string())
+        msg = Message('Restablecimiento de contraseña', recipients=[email])
+        msg.body = f"Para restablecer su contraseña, haga clic en el siguiente enlace: {reset_link}"
+        mail.send(msg)
     except Exception as e:
         print(f"Error sending email: {e}")
 
@@ -146,7 +150,7 @@ def update_survey_status():
 
 @app.route('/update_survey_schedule', methods=['POST'])
 def update_survey_schedule():
-    if not session.get('admin'):
+    if not session.get('admin')):
         return redirect(url_for('admin'))
     start_time = request.form.get('start_time')
     end_time = request.form.get('end_time')
