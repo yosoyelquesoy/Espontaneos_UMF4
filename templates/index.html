@@ -93,6 +93,12 @@
         .terms-popup button {
             background-color: #dc3545;
         }
+        .timestamp {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -146,6 +152,8 @@
             
             <button type="submit">Enviar</button>
         </form>
+
+        <div class="timestamp" id="timestamp"></div>
         
         <div class="admin-link">
             <p>¿Eres administrador? <a href="/admin">Inicia sesión aquí</a></p>
@@ -206,14 +214,24 @@
             event.target.value = event.target.value.toUpperCase();
         }
 
+        function displayCurrentDateTime() {
+            const now = new Date();
+            const date = now.toLocaleDateString();
+            const time = now.toLocaleTimeString();
+            document.getElementById('timestamp').textContent = `Fecha y Hora actuales: ${date} ${time}`;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], select');
             inputs.forEach(input => {
                 input.addEventListener('blur', convertToUpperCase);
             });
-        });
 
-        checkSurveyStatus();
+            displayCurrentDateTime();
+            setInterval(displayCurrentDateTime, 1000); // Update the time every second
+
+            checkSurveyStatus();
+        });
     </script>
 </body>
 </html>
