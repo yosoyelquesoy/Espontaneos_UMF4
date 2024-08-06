@@ -50,21 +50,6 @@
         .admin-links a:hover {
             background-color: #0056b3;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
         .form-section {
             margin-top: 20px;
         }
@@ -98,6 +83,33 @@
         .form-section form button:hover {
             background-color: #0056b3;
         }
+        .message {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +121,16 @@
         <div class="admin-links">
             <a href="{{ url_for('change_password') }}">Cambiar Contraseña</a>
         </div>
+        {% if success %}
+        <div class="message" id="message">
+            {{ success }}
+        </div>
+        <script>
+            setTimeout(function() {
+                document.getElementById('message').classList.add('hidden');
+            }, 3000);
+        </script>
+        {% endif %}
         <div class="form-section">
             <h3>Cambiar Estado de la Encuesta</h3>
             <form method="POST" action="{{ url_for('update_survey_status') }}">

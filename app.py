@@ -82,7 +82,8 @@ def admin_dashboard():
         return redirect(url_for('admin'))
     config = load_config()
     csv_files = os.listdir(CSV_DIR)
-    return render_template('admin_dashboard.html', config=config, csv_files=csv_files)
+    success_message = request.args.get('success')
+    return render_template('admin_dashboard.html', config=config, csv_files=csv_files, success=success_message)
 
 @app.route('/download/<filename>')
 def download(filename):
@@ -108,7 +109,7 @@ def update_survey_status():
     config = load_config()
     config['status'] = status
     save_config(config)
-    return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('admin_dashboard', success='Estado de la encuesta actualizado con éxito.'))
 
 @app.route('/update_survey_schedule', methods=['POST'])
 def update_survey_schedule():
@@ -120,7 +121,7 @@ def update_survey_schedule():
     config['start_time'] = start_time
     config['end_time'] = end_time
     save_config(config)
-    return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('admin_dashboard', success='Horario de la encuesta actualizado con éxito.'))
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
