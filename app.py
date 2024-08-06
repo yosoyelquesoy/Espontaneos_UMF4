@@ -51,13 +51,14 @@ def submit():
         return jsonify({'success': False, 'message': 'La encuesta está fuera del horario permitido.'})
 
     data = request.form.to_dict()
+    data['timestamp'] = datetime.now(pytz.timezone(TIMEZONE)).strftime('%Y-%m-%d %H:%M:%S')
     csv_file = get_csv_file()
     file_exists = os.path.isfile(csv_file)
 
     with open(csv_file, 'a', newline='') as f:
         writer = csv.writer(f)
         if not file_exists:
-            writer.writerow(['name', 'email', 'ssn', 'agg', 'phone', 'consultorio', 'turno'])
+            writer.writerow(['name', 'email', 'ssn', 'agg', 'phone', 'consultorio', 'turno', 'timestamp'])
         writer.writerow(data.values())
 
     return jsonify({'success': True, 'redirect': url_for('thankyou')})
