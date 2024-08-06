@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, session, s
 import csv
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 
 app = Flask(__name__)
@@ -10,7 +10,7 @@ app.secret_key = 'supersecretkey'
 
 CONFIG_FILE = 'config.json'
 CSV_DIR = 'data_csv'
-TIMEZONE = 'America/Phoenix'  # Arizona Time
+TIMEZONE = 'Etc/GMT+7'  # GMT-7
 
 if not os.path.exists(CSV_DIR):
     os.makedirs(CSV_DIR)
