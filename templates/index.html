@@ -41,6 +41,15 @@
             width: 100%;
             box-sizing: border-box;
         }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .checkbox-container input {
+            width: auto;
+            margin-right: 10px;
+        }
         button {
             padding: 10px;
             background-color: #28a745;
@@ -130,10 +139,10 @@
                 <option value="vespertino">Vespertino</option>
             </select>
             
-            <label for="terms">
+            <div class="checkbox-container">
                 <input type="checkbox" id="terms" name="terms" required>
-                Acepto las <a href="javascript:void(0);" onclick="showTerms()">políticas de privacidad</a>
-            </label>
+                <label for="terms">Acepto las <a href="javascript:void(0);" onclick="showTerms()">políticas de privacidad</a></label>
+            </div>
             
             <button type="submit">Enviar</button>
         </form>
