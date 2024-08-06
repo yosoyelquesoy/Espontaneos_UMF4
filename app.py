@@ -93,14 +93,15 @@ def thankyou():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     try:
+        error = None
         if request.method == 'POST':
             admin_data = load_admin()
             if request.form['password'] == admin_data['password']:
                 session['admin'] = True
                 return redirect(url_for('admin_dashboard'))
             else:
-                flash('Contraseña incorrecta')
-        return render_template('admin.html')
+                error = 'Contraseña incorrecta'
+        return render_template('admin.html', error=error)
     except Exception as e:
         logging.error(f"Error in /admin: {e}")
         return render_template('admin.html', error="Error interno del servidor.")

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión</title>
+    <title>Iniciar Sesión - Administración</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
@@ -55,16 +55,9 @@
         button:hover {
             background-color: #0056b3;
         }
-        .forgot-password {
+        .error {
+            color: red;
             text-align: center;
-            margin-top: 10px;
-        }
-        .forgot-password a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .forgot-password a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
@@ -75,10 +68,10 @@
             <label for="password">Contraseña:</label>
             <input type="password" id="password" name="password" required>
             <button type="submit">Iniciar Sesión</button>
+            {% if error %}
+            <div class="error">{{ error }}</div>
+            {% endif %}
         </form>
-        <div class="forgot-password">
-            <a href="{{ url_for('forgot_password') }}">¿Olvidaste tu contraseña?</a>
-        </div>
     </div>
 </body>
 </html>
