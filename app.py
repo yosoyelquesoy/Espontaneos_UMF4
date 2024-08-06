@@ -10,7 +10,7 @@ app.secret_key = 'supersecretkey'
 
 CONFIG_FILE = 'config.json'
 CSV_DIR = 'data_csv'
-TIMEZONE = 'Etc/GMT+7'  # GMT-7
+TIMEZONE = 'Etc/GMT-7'  # GMT-7
 
 if not os.path.exists(CSV_DIR):
     os.makedirs(CSV_DIR)
