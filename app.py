@@ -10,7 +10,7 @@ app.secret_key = 'supersecretkey'
 
 CONFIG_FILE = 'config.json'
 CSV_DIR = 'data_csv'
-TIMEZONE = 'Etc/GMT-7'  # GMT-7
+TIMEZONE = 'Etc/GMT+7'  # GMT-7
 
 if not os.path.exists(CSV_DIR):
     os.makedirs(CSV_DIR)
@@ -104,23 +104,23 @@ def delete(filename):
 def update_survey_status():
     if not session.get('admin'):
         return redirect(url_for('admin'))
-    status = request.json.get('status')
+    status = request.form.get('status')
     config = load_config()
     config['status'] = status
     save_config(config)
-    return jsonify({'success': True})
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/update_survey_schedule', methods=['POST'])
 def update_survey_schedule():
     if not session.get('admin'):
         return redirect(url_for('admin'))
-    start_time = request.json.get('startTime')
-    end_time = request.json.get('endTime')
+    start_time = request.form.get('start_time')
+    end_time = request.form.get('end_time')
     config = load_config()
     config['start_time'] = start_time
     config['end_time'] = end_time
     save_config(config)
-    return jsonify({'success': True})
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():

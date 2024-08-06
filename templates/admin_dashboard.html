@@ -65,6 +65,39 @@
         th {
             background-color: #f4f4f4;
         }
+        .form-section {
+            margin-top: 20px;
+        }
+        .form-section h3 {
+            color: #333;
+        }
+        .form-section form {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .form-section form label {
+            margin-right: 10px;
+        }
+        .form-section form input, .form-section form select {
+            margin-right: 10px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .form-section form button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .form-section form button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -75,8 +108,27 @@
         </div>
         <div class="admin-links">
             <a href="{{ url_for('change_password') }}">Cambiar Contraseña</a>
-            <a href="{{ url_for('update_survey_status') }}">Estado de la Encuesta</a>
-            <a href="{{ url_for('update_survey_schedule') }}">Horario de la Encuesta</a>
+        </div>
+        <div class="form-section">
+            <h3>Cambiar Estado de la Encuesta</h3>
+            <form method="POST" action="{{ url_for('update_survey_status') }}">
+                <label for="status">Estado:</label>
+                <select id="status" name="status">
+                    <option value="open" {% if config['status'] == 'open' %}selected{% endif %}>Abierta</option>
+                    <option value="closed" {% if config['status'] == 'closed' %}selected{% endif %}>Cerrada</option>
+                </select>
+                <button type="submit">Actualizar Estado</button>
+            </form>
+        </div>
+        <div class="form-section">
+            <h3>Actualizar Horario de la Encuesta</h3>
+            <form method="POST" action="{{ url_for('update_survey_schedule') }}">
+                <label for="start_time">Hora de Inicio:</label>
+                <input type="time" id="start_time" name="start_time" value="{{ config['start_time'] }}">
+                <label for="end_time">Hora de Fin:</label>
+                <input type="time" id="end_time" name="end_time" value="{{ config['end_time'] }}">
+                <button type="submit">Actualizar Horario</button>
+            </form>
         </div>
         <h3>Archivos de Encuestas</h3>
         <table>
