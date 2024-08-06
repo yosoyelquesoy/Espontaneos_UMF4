@@ -50,7 +50,7 @@ def submit():
     if start_time and end_time and not (start_time <= current_time <= end_time):
         return jsonify({'success': False, 'message': 'La encuesta está fuera del horario permitido.'})
 
-    data = request.form.to_dict()
+    data = {key: value.upper() for key, value in request.form.items()}
     data['timestamp'] = datetime.now(pytz.timezone(TIMEZONE)).strftime('%Y-%m-%d %H:%M:%S')
     csv_file = get_csv_file()
     file_exists = os.path.isfile(csv_file)
